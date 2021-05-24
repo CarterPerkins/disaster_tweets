@@ -1,5 +1,6 @@
 import time
 from typing import Dict, Tuple
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -44,10 +45,9 @@ def get_model(model_type: str):
         'logistic_regression': {
             'model': LogisticRegression,
             'hyperparameters': {
-                'C': list(10**k for k in range(2, -11, -1)),
+                'C': list(10**k for k in range(2, -15, -1)),
                 'solver': ['liblinear', 'sag', 'saga'],
-                'penalty': ['l2', 'l1', 'elasticnet'],
-                'max_iter': [10000]
+                'penalty': ['l2', 'l1'],
             }
         }
     }
@@ -88,16 +88,21 @@ def run_experiment(partitions: Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame],
     # Test the model
     test_start = time.time()
     y_pred = tuned_model.predict(X_test)
+
+    test_end = time.time()
+    print(f'\tTested in {test_end - test_start:.3f}s')
+    elapsed = test_end - partition_start
+    print(f'Experiment finished in {elapsed:.3f}s')
+
     results = {
         'roc_auc_score': roc_auc_score(y_test, y_pred),
         'f1_score': f1_score(y_test, y_pred),
         'accuracy_score': accuracy_score(y_test, y_pred),
         'model': model,
         'document_type': document_type,
+        'elapsed': elapsed,
+        'confusion_matrix': list(confusion_matrix(y_test, y_pred)),
+        'params': search.best_params_
     }
-    test_end = time.time()
-    print(f'\tTested in {test_end - test_start:.3f}s')
-    print(confusion_matrix(y_test, y_pred))
-    print(f'Experiment finished in {test_end - partition_start:.3f}s')
 
     return results
