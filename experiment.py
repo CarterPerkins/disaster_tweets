@@ -1,15 +1,15 @@
 import time
 from typing import Dict, Tuple
-import warnings
 
 import numpy as np
 import pandas as pd
 
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, confusion_matrix, f1_score, roc_auc_score
+from sklearn.metrics import accuracy_score, confusion_matrix, f1_score, precision_score, recall_score, roc_auc_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
 
 from utility import bag_of_words, tf_idf, split_dataframe, word_embedding
 
@@ -26,6 +26,7 @@ def get_document(document_type: str):
     except KeyError:
         raise Exception(f'Unknown document type: {document_type}')
 
+
 def get_model(model_type: str):
     model_types = {
         'naive_bayes': {
@@ -37,7 +38,7 @@ def get_model(model_type: str):
         'knn': {
             'model': KNeighborsClassifier,
             'hyperparameters': {
-                'n_neighbors': list(range(3, 14, 2)),
+                'n_neighbors': list(range(3, 16, 2)),
                 'weights': ['uniform', 'distance'],
                 'metric': ['euclidean', 'manhattan', 'chebyshev']
             }
@@ -45,9 +46,16 @@ def get_model(model_type: str):
         'logistic_regression': {
             'model': LogisticRegression,
             'hyperparameters': {
-                'C': list(10**k for k in range(2, -15, -1)),
+                'C': list(10**k for k in range(2, -5, -1)),
                 'solver': ['liblinear', 'sag', 'saga'],
                 'penalty': ['l2', 'l1'],
+            }
+        },
+        'svm': {
+            'model': SVC,
+            'hyperparameters': {
+                'C': list(10**k for k in range(2, -5, -1)),
+                'kernel': ['linear', 'rbf', 'sigmoid', 'poly']
             }
         }
     }
@@ -56,6 +64,7 @@ def get_model(model_type: str):
         return model_types[model_type]
     except KeyError:
         raise Exception(f'Unknown model type: {model_type}')
+
 
 def run_experiment(partitions: Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame],
                    document_type: str,
@@ -73,7 +82,8 @@ def run_experiment(partitions: Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame],
     print(f'\tConverted documents in {partition_end - partition_start:.3f}s')
     # Train the model
     train_start = time.time()
-    clf, settings = get_model(model)['model'](), get_model(model)['hyperparameters']
+    clf = get_model(model)['model']()
+    settings = get_model(model)['hyperparameters']
     trained_model = clf.fit(X_train, y_train)
     train_end = time.time()
     print(f'\tTrained in {train_end - train_start:.3f}s')
@@ -98,10 +108,12 @@ def run_experiment(partitions: Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame],
         'roc_auc_score': roc_auc_score(y_test, y_pred),
         'f1_score': f1_score(y_test, y_pred),
         'accuracy_score': accuracy_score(y_test, y_pred),
+        'precision_score': precision_score(y_test, y_pred),
+        'recall_score': recall_score(y_test, y_pred),
+        'confusion_matrix': confusion_matrix(y_test, y_pred).tolist(),
         'model': model,
         'document_type': document_type,
         'elapsed': elapsed,
-        'confusion_matrix': list(confusion_matrix(y_test, y_pred)),
         'params': search.best_params_
     }
 

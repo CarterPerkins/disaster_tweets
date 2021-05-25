@@ -13,6 +13,7 @@ def split_dataframe(df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
     y = df['target'].to_numpy()
     return (X, y)
 
+
 def bag_of_words(X_train: np.ndarray, X_val: np.ndarray, X_test: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     # Naive Bayes with Bag of Words
     cv = CountVectorizer()
@@ -22,6 +23,7 @@ def bag_of_words(X_train: np.ndarray, X_val: np.ndarray, X_test: np.ndarray) -> 
 
     return (X_train_counts, X_val_counts, X_test_counts)
 
+
 def tf_idf(X_train: np.ndarray, X_val: np.ndarray, X_test: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     # Naive Bayes with TF-IDF Vectors
     tv = TfidfVectorizer()
@@ -30,6 +32,7 @@ def tf_idf(X_train: np.ndarray, X_val: np.ndarray, X_test: np.ndarray) -> Tuple[
     X_test_tfidf = tv.transform(X_test).toarray()
 
     return (X_train_tfidf, X_val_tfidf, X_test_tfidf)
+
 
 def word_embedding(X_train: np.ndarray, X_val: np.ndarray, X_test: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     train_df = pd.DataFrame(X_train)[0]

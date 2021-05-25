@@ -40,6 +40,7 @@ def clean_tweet(tweet: str) -> str:
 
     return ' '.join(cleaned_tweet)
 
+
 def preprocess() -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     df = pd.read_csv('./data/train.csv')
     df['text'] = df['text'].apply(clean_tweet)
