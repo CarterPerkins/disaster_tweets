@@ -11,7 +11,7 @@ if __name__ == '__main__':
 
     experiments = []
     for model in ['naive_bayes', 'knn', 'logistic_regression', 'svm', 'neural_network']:
-        if model not in ['neural_network']:
+        if model in ['neural_network']:
             continue
         for document in ['bag_of_words', 'tf_idf', 'word_embedding']:
             results = run_experiment(partitions, document, model)

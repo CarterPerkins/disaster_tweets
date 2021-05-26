@@ -1,11 +1,125 @@
-from typing import Tuple
+from typing import Any, Dict, Tuple
 
 from gensim.models import FastText
 
 import numpy as np
 import pandas as pd
 
+from sklearn.linear_model import LogisticRegression
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+from sklearn.naive_bayes import GaussianNB, MultinomialNB
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+
+
+def get_document(document_type: str) -> callable:
+    document_types = {
+        'bag_of_words': bag_of_words,
+        'tf_idf': tf_idf,
+        'word_embedding': word_embedding
+    }
+
+    try:
+        return document_types[document_type]
+    except KeyError:
+        raise Exception(f'Unknown document type: {document_type}')
+
+
+def get_model(model_type: str) -> Dict[str, Dict[str, Dict[str, Any]]]:
+    model_types = {
+        'naive_bayes': {
+            'model': {
+                'bag_of_words': MultinomialNB,
+                'tf_idf': MultinomialNB,
+                'word_embedding': GaussianNB,
+            },
+            'hyperparameters': {
+                'bag_of_words': {
+                    'alpha': np.logspace(2, -5, num=100)
+                },
+                'tf_idf': {
+                    'alpha': np.logspace(2, -5, num=100)
+                },
+                'word_embedding': {
+                    'var_smoothing': np.logspace(0, -15, num=100)
+                }
+            }
+        },
+        'knn': {
+            'model': {
+                'bag_of_words': KNeighborsClassifier,
+                'tf_idf': KNeighborsClassifier,
+                'word_embedding': KNeighborsClassifier
+            },
+            'hyperparameters': {
+                'bag_of_words': {
+                    'n_neighbors': list(range(3, 16, 2)),
+                    'weights': ['uniform', 'distance'],
+                    'metric': ['euclidean', 'manhattan', 'chebyshev']
+                },
+                'tf_idf': {
+                    'n_neighbors': list(range(3, 16, 2)),
+                    'weights': ['uniform', 'distance'],
+                    'metric': ['euclidean', 'manhattan', 'chebyshev']
+                },
+                'word_embedding': {
+                    'n_neighbors': list(range(3, 16, 2)),
+                    'weights': ['uniform', 'distance'],
+                    'metric': ['euclidean', 'manhattan', 'chebyshev']
+                }
+            }
+        },
+        'logistic_regression': {
+            'model': {
+                'bag_of_words': LogisticRegression,
+                'tf_idf': LogisticRegression,
+                'word_embedding': LogisticRegression
+            },
+            'hyperparameters': {
+                'bag_of_words': {
+                    'C': np.logspace(2, -5, num=100),
+                    'solver': ['liblinear', 'sag', 'saga'],
+                    'penalty': ['l2', 'l1'],
+                },
+                'tf_idf': {
+                    'C': np.logspace(2, -5, num=100),
+                    'solver': ['liblinear', 'sag', 'saga'],
+                    'penalty': ['l2', 'l1'],
+                },
+                'word_embedding': {
+                    'C': np.logspace(2, -5, num=100),
+                    'solver': ['liblinear', 'sag', 'saga'],
+                    'penalty': ['l2', 'l1'],
+                }
+            }
+        },
+        'svm': {
+            'model': {
+                'bag_of_words': SVC,
+                'tf_idf': SVC,
+                'word_embedding': SVC
+            },
+            'hyperparameters': {
+                'bag_of_words': {
+                    'C': np.logspace(2, -5, num=100),
+                    'kernel': ['linear', 'rbf', 'sigmoid', 'poly']
+                },
+                'tf_idf': {
+                    'C': np.logspace(2, -5, num=100),
+                    'kernel': ['linear', 'rbf', 'sigmoid', 'poly']
+                },
+                'word_embedding': {
+                    'C': np.logspace(2, -5, num=100),
+                    'kernel': ['linear', 'rbf', 'sigmoid', 'poly']
+                }
+            }
+        }
+    }
+
+    try:
+        return model_types[model_type]
+    except KeyError:
+        raise Exception(f'Unknown model type: {model_type}')
 
 
 def split_dataframe(df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
