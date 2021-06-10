@@ -14,7 +14,7 @@ if __name__ == '__main__':
         if model in ['neural_network']:
             continue
         for document in ['bag_of_words', 'tf_idf', 'word_embedding']:
-            payload = run_experiment(partitions, document, model, 10)
+            payload = run_experiment(partitions, document, model, None)
             experiments.append(payload['results'])
 
             print('f1\t\tacc\t\troc_auc')

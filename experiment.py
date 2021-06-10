@@ -25,11 +25,15 @@ def train_and_validate(X_train: np.ndarray, X_val: np.ndarray, y_train: np.ndarr
 
     '''
     start = time.time()
-    model = clf(**params)
-    model.fit(X_train, y_train)
-    y_pred = model.predict(X_val)
+    try:
+        model = clf(**params)
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_val)
+        f1 = f1_score(y_val, y_pred)
+    except:
+        f1 = -1
     elapsed = time.time() - start
-    print(f'\t\tElapsed: {elapsed:.3f}s\tF1: {f1_score(y_val, y_pred):.3f}')
+    print(f'\t\tElapsed: {elapsed:.3f}s\tF1: {f1:.3f}')
     return {'scorer': f1_score(y_val, y_pred), 'model': model, 'params': params}
 
 
