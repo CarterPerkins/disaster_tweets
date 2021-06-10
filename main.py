@@ -10,13 +10,17 @@ if __name__ == '__main__':
         print(df.head())
 
     experiments = []
-    for model in ['naive_bayes', 'knn', 'logistic_regression', 'svm', 'neural_network']:
+    for model in ['naive_bayes', 'knn', 'logistic_regression', 'svm', 'decision_tree','neural_network']:
         if model in ['neural_network']:
             continue
         for document in ['bag_of_words', 'tf_idf', 'word_embedding']:
-            results = run_experiment(partitions, document, model)
-            experiments.append(results)
-            print(results)
+            payload = run_experiment(partitions, document, model, 10)
+            experiments.append(payload['results'])
+
+            print('f1\t\tacc\t\troc_auc')
+            print(payload['results']['f1_score'],
+                  payload['results']['accuracy_score'],
+                  payload['results']['roc_auc_score'])
             print('-'*80)
 
     with open('output.json', 'w', encoding='utf-8') as fp:

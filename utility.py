@@ -1,4 +1,4 @@
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Tuple, Union
 
 from gensim.models import FastText
 
@@ -10,6 +10,11 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.naive_bayes import GaussianNB, MultinomialNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
+
+
+ExperimentClassifier = Union[LogisticRegression, GaussianNB, MultinomialNB, KNeighborsClassifier,
+                             SVC, DecisionTreeClassifier]
 
 
 def get_document(document_type: str) -> callable:
@@ -27,6 +32,27 @@ def get_document(document_type: str) -> callable:
 
 def get_model(model_type: str) -> Dict[str, Dict[str, Dict[str, Any]]]:
     model_types = {
+        'decision_tree': {
+            'model': {
+                'bag_of_words': DecisionTreeClassifier,
+                'tf_idf': DecisionTreeClassifier,
+                'word_embedding': DecisionTreeClassifier
+            },
+            'hyperparameters': {
+                'bag_of_words': {
+                    'criterion': ['gini', 'entropy'],
+                    'random_state': [0],
+                },
+                'tf_idf': {
+                    'criterion': ['gini', 'entropy'],
+                    'random_state': [0],
+                },
+                'word_embedding': {
+                    'criterion': ['gini', 'entropy'],
+                    'random_state': [0],
+                }
+            }
+        },
         'naive_bayes': {
             'model': {
                 'bag_of_words': MultinomialNB,
@@ -35,13 +61,13 @@ def get_model(model_type: str) -> Dict[str, Dict[str, Dict[str, Any]]]:
             },
             'hyperparameters': {
                 'bag_of_words': {
-                    'alpha': np.logspace(2, -5, num=100)
+                    'alpha': np.logspace(2, -5, num=10)
                 },
                 'tf_idf': {
-                    'alpha': np.logspace(2, -5, num=100)
+                    'alpha': np.logspace(2, -5, num=10)
                 },
                 'word_embedding': {
-                    'var_smoothing': np.logspace(0, -15, num=100)
+                    'var_smoothing': np.logspace(0, -15, num=10)
                 }
             }
         },
@@ -77,19 +103,22 @@ def get_model(model_type: str) -> Dict[str, Dict[str, Dict[str, Any]]]:
             },
             'hyperparameters': {
                 'bag_of_words': {
-                    'C': np.logspace(2, -5, num=100),
+                    'C': np.logspace(2, -5, num=10),
                     'solver': ['liblinear', 'sag', 'saga'],
                     'penalty': ['l2', 'l1'],
+                    'max_iter': [10000]
                 },
                 'tf_idf': {
-                    'C': np.logspace(2, -5, num=100),
+                    'C': np.logspace(2, -5, num=10),
                     'solver': ['liblinear', 'sag', 'saga'],
                     'penalty': ['l2', 'l1'],
+                    'max_iter': [10000]
                 },
                 'word_embedding': {
-                    'C': np.logspace(2, -5, num=100),
+                    'C': np.logspace(2, -5, num=10),
                     'solver': ['liblinear', 'sag', 'saga'],
                     'penalty': ['l2', 'l1'],
+                    'max_iter': [10000]
                 }
             }
         },
@@ -101,15 +130,15 @@ def get_model(model_type: str) -> Dict[str, Dict[str, Dict[str, Any]]]:
             },
             'hyperparameters': {
                 'bag_of_words': {
-                    'C': np.logspace(2, -5, num=100),
+                    'C': np.logspace(2, -5, num=10),
                     'kernel': ['linear', 'rbf', 'sigmoid', 'poly']
                 },
                 'tf_idf': {
-                    'C': np.logspace(2, -5, num=100),
+                    'C': np.logspace(2, -5, num=10),
                     'kernel': ['linear', 'rbf', 'sigmoid', 'poly']
                 },
                 'word_embedding': {
-                    'C': np.logspace(2, -5, num=100),
+                    'C': np.logspace(2, -5, num=10),
                     'kernel': ['linear', 'rbf', 'sigmoid', 'poly']
                 }
             }
